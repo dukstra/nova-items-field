@@ -1,90 +1,53 @@
-## Nova Items Field
+# Dukstra Nova Items Field
 
-[![Latest Version on Github](https://img.shields.io/github/release/dillingham/nova-items-field.svg?style=flat-square)](https://packagist.org/packages/dillingham/nova-items-field)
-[![Total Downloads](https://img.shields.io/packagist/dt/dillingham/nova-items-field.svg?style=flat-square)](https://packagist.org/packages/dillingham/nova-items-field) [![Twitter Follow](https://img.shields.io/twitter/follow/im_brian_d?color=%231da1f1&label=Twitter&logo=%231da1f1&logoColor=%231da1f1&style=flat-square)](https://twitter.com/im_brian_d)
+An editable Nova field for string arrays, with add/remove, validation and drag-to-reorder support. This Laravel Nova 5 update is based on the MIT-licensed `dillingham/nova-items-field` and the Nova 5-compatible work in `blendbyte/nova-items-field`.
 
-Laravel Nova array items field with sorting, validation & many [display options](https://github.com/dillingham/nova-items-field#additional-options)
+## Requirements
 
-![nova-array-input-field](https://user-images.githubusercontent.com/29180903/51337942-7d1be300-1a56-11e9-84fa-66f5b285c279.png)
+- PHP 8.3+
+- Laravel 13
+- Laravel Nova 5
 
-### Installation
+## Installation
+
+```bash
+composer require dukstra/nova-items-field
 ```
-composer require dillingham/nova-items-field
-```
 
-### Usage
+## Use
 
 ```php
-use NovaItemsField\Items;
+use Dukstra\NovaItemsField\Items;
+
+Items::make('Direct Emails', 'direct_emails')
+    ->rules(['direct_emails.*' => 'email|min:10'])
+    ->listFirst()
+    ->placeholder('Email')
+    ->draggable();
 ```
+
+Cast the model attribute as an array so Nova reads the saved JSON as a PHP array:
+
 ```php
-function fields() {
-    return [
-        Items::make('Emails'),
-    ]
-}
-```
-and be sure to [cast](https://laravel.com/docs/5.7/eloquent-mutators#array-and-json-casting) the property as an array on your eloquent model
-```php
-public $casts = [
-    'emails' => 'array'
+protected $casts = [
+    'direct_emails' => 'array',
 ];
 ```
-### Validation
-Use Laravel's built in [array validation](https://laravel.com/docs/5.7/validation#validating-arrays)
-```php
-Items::make('Emails')->rules([
-    'emails.*' => 'email|min:10',
-]),
-```
-Manually setting the attribute may be needed in some cases.
-```php
-Items::make('Long Text', 'attribute')->rules([
-    'attribute.*' => 'email|min:10',
-]),
-```
-### Array processing
 
-Use the array to perform other actions by making an [observer](https://nova.laravel.com/docs/1.0/resources/#resource-events)
+The field submits and stores the same JSON array of strings as the original package. An empty field saves `null`; a populated field saves the submitted values in their display order.
 
-```php
-function saving($user)
-{
-    foreach($user->emails as $email)
-    {
-        //
-    }
-}
-```
+## Options
 
-### Replace item vue component
+- `max($count)` limits the number of values.
+- `draggable()` enables drag-to-reorder.
+- `listFirst()` moves the add control below the list.
+- `placeholder($text)` sets the input placeholder.
+- `inputType($type)` sets the input type.
+- `fullWidth()` expands the field.
+- `maxHeight($pixels)` limits the list height.
+- `hideCreateButton()` hides the add button.
+- `createButtonValue($text)` and `deleteButtonValue($text)` customize button labels.
+- `indexAsList()` shows values as a list on the index page.
+- `detailsAsTotal()` shows the item count on the detail page.
 
-Here's a brief walkthrough to customize the vue item - [view](https://github.com/dillingham/nova-items-field/issues/10#issuecomment-527315057)
-
-
-
-### Additional options 
-
-| function | description | default |
-| - | - | - |
-| `->max(number)` | limit number of items allowed | false |
-| `->draggable()` | turn on drag/drop sorting | false |
-| `->fullWidth()` | increase the width of field area | false |
-| `->maxHeight(pixel)` | limit the height of the list | false |
-| `->listFirst()`| move add new to the bottom  | false |
-| `->inputType(text)` | text, date, etc | "text" |
-| `->placeholder($value)` | the new item input text | "Add a new item" |
-| `->deleteButtonValue($value)` | value for delete button | "x" |
-| `->createButtonValue($value)` | value for create button | "Add" |
-| `->hideCreateButton()` | hide the "add" button | false |
-
-
----
-
-# Author
-
-Hi 👋, Im Brian Dillingham, creator of this Nova package [and others](https://novapackages.com/collaborators/dillingham)
-
-Hope you find it useful. Feel free to reach out with feedback.
-
-Follow me on twitter: [@im_brian_d](https://twitter.com/im_brian_d) 
+The Nova 5 compatible frontend bundle is included in `dist/`.
