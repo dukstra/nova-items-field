@@ -1,48 +1,70 @@
 <?php
 
-namespace NovaItemsField;
+namespace Dukstra\NovaItemsField;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Facades\Validator;
 
-class ArrayRules implements Rule
+class ArrayRules implements ValidationRule
 {
     public $rules = [];
 
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
     public function __construct(array $rules)
     {
         $this->rules = $rules;
     }
 
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
+    protected function getValidationAttribute($attribute)
     {
-        $input = [$attribute => json_decode($value)];
-
-        $validator = \Validator::make($input, $this->rules, [], [ "$attribute.*" => 'input']);
-
-        $this->message = $validator->errors();
-
-        return $validator->passes();
+        return str_replace('.', '=>', $attribute);
     }
 
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
+    protected function getErrorAttribute($validationAttribute, $errorAttribute)
     {
-        return $this->message;
+        return preg_replace(
+            '/'.$validationAttribute.'\.?/',
+            '',
+            str_replace('=>', '.', $errorAttribute)
+        );
+    }
+
+    protected function getRules($attribute): array
+    {
+        $rules = [];
+        foreach ($this->rules as $attr => $rule) {
+            if (empty($rule)) {
+                continue;
+            }
+            if ($attr === $attribute.'.*') {
+                $rules[$attr] = $rule;
+                continue;
+            }
+            if (empty($attr) || $attr === $attribute) {
+                $rules[$attribute] = $rule;
+                continue;
+            }
+            if (strpos($attr, $attribute.'.') === 0) {
+                continue;
+            }
+
+            $rules[$attribute.'.'.$attr] = $rule;
+        }
+        return $rules;
+    }
+
+    public function validate(string $attribute, $value, Closure $fail): void
+    {
+        $validationAttribute = $this->getValidationAttribute($attribute);
+        $input = [$validationAttribute => json_decode($value)];
+        $rules =  $this->getRules($validationAttribute);
+        $validator = Validator::make($input, $rules, [], [(string)($validationAttribute) => 'list', $validationAttribute . '.*' => 'input']);
+        $errors = [];
+        foreach ($validator->errors()->toArray() as $attr => $error) {
+            $errors[$this->getErrorAttribute($attribute, $attr)] = $error;
+        }
+        if (count($errors)) {
+            $fail(json_encode($errors));
+        }
     }
 }

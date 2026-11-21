@@ -1,24 +1,34 @@
 <template>
-    <div class="flex border-b border-40">
-        <div class="w-1/4 py-4">
-             <h4 class="font-normal text-80">
-                {{ field.name }}
-            </h4>
-        </div>
-        <div class="w-3/4 pt-4">
-            <component
-                :item="item"
-                :key="index"
-                v-bind="$props"
-                :is="field.detailItemComponent"
-                v-for="(item, index) in field.value"
-            />
-        </div>
-    </div>
+  <PanelItem :index="index" :field="field">
+    <template #value>
+      <span v-if="!shouldDisplayDetailsAsTotal && !shouldDisplayAsHtml">
+        <ul class="nova-items-field-list">
+          <li class="mb-1" style="list-style: square; margin-left: 1rem;" v-for="(value,index) in fieldValue" :key="index">{{value}}</li>
+        </ul>
+      </span>
+      <span v-else-if="shouldDisplayDetailsAsTotal" class="nova-items-field-total">
+        {{fieldValue.length}}
+      </span>
+      <span ref="theFieldValue" v-else-if="shouldDisplayAsHtml" class="nova-items-field">
+        {{ fieldValue }}
+      </span>
+      <span
+        @click.stop
+        v-else-if="shoudDisplayAsHtml"
+        v-html="fieldValue"
+        class="nova-items-field"
+      />
+      <p v-else>&mdash;</p>
+    </template>
+  </PanelItem>
 </template>
 
 <script>
+import { CopiesToClipboard, FieldValue } from 'laravel-nova'
+import HasFieldValue from "../mixins/HasFieldValue";
+
 export default {
-    props: ['resource', 'resourceName', 'resourceId', 'field']
+    mixins: [CopiesToClipboard, HasFieldValue],
+    props: ['resource', 'resourceName', 'resourceId', 'field'],
 }
 </script>

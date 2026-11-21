@@ -1,29 +1,32 @@
 {
-    "name": "dillingham/nova-items-field",
-    "description": "Nova field to handle array columns",
+    "name": "dukstra/nova-items-field",
+    "description": "Laravel Nova 5 field for editable string arrays, forked from dillingham/nova-items-field",
     "keywords": [
         "laravel",
-        "nova"
+        "nova",
+        "items",
+        "array"
     ],
     "license": "MIT",
     "require": {
-        "php": ">=7.1.0"
+        "php": "^8.3",
+        "ext-json": "*",
+        "laravel/framework": "^13.0",
+        "laravel/nova": "^5.0"
     },
     "autoload": {
         "psr-4": {
-            "NovaItemsField\\": "src/"
+            "Dukstra\\NovaItemsField\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "NovaItemsField\\FieldServiceProvider"
+                "Dukstra\\NovaItemsField\\FieldServiceProvider"
             ]
         }
     },
     "config": {
         "sort-packages": true
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
